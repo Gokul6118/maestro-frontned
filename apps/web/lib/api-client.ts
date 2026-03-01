@@ -4,7 +4,7 @@ import createReactQueryClient from "openapi-react-query";
 import type { paths } from "./api-types";
 
 const client = createClient<paths>({
-	baseUrl: "https://maestro-done-server.vercel.app",
+	baseUrl: "https://maestro-done-baclend-web.vercel.app/",
 	credentials: "include",
 });
 

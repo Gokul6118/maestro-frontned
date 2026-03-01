@@ -1,0 +1,10 @@
+
+
+echo "🔍 Running Ultracite..."
+
+pnpm ultracite fix
+
+echo "🎨 Running Biome..."
+pnpm biome check . --write
+
+git add --update

@@ -1,0 +1,269 @@
+import { useQuery } from "@tanstack/react-query";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	type ChartConfig,
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "@workspace/ui/components/chart";
+import { TrendingUp } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+
+interface Todo {
+	date: string;
+	done: boolean;
+	endDate: string;
+	id: number;
+	text: string;
+}
+
+const API_URL = "https://localhost:3000/api";
+
+/* ---------------- Fetch Todos ---------------- */
+
+const getTodos = async (): Promise<Todo[]> => {
+	const res = await fetch(`${API_URL}/`);
+
+	if (!res.ok) {
+		throw new Error("Failed to fetch todos");
+	}
+
+	return res.json();
+};
+
+/* ---------------- Chart Configs ---------------- */
+
+const smallChartConfig = {
+	value: { label: "Tasks", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+
+const bigChartConfig = {
+	value: { label: "Tasks", color: "var(--chart-2)" },
+} satisfies ChartConfig;
+
+/* ---------------- Utils ---------------- */
+
+/**
+ * Safely normalize ISO date string
+ */
+const normalizeDate = (value: string): Date => {
+	const [datePart] = value.split("T");
+
+	if (!datePart) {
+		throw new Error("Invalid date format");
+	}
+
+	return new Date(datePart);
+};
+
+/* ---------------- Main Component ---------------- */
+
+export function Chartbar() {
+	const { data: items = [] } = useQuery({
+		queryKey: ["todos"],
+		queryFn: getTodos,
+	});
+
+	/* ---------- Status Data ---------- */
+
+	const progressCount = items.filter((i) => !i.done).length;
+	const doneCount = items.filter((i) => i.done).length;
+
+	const statusData = [
+		{ label: "Progress", value: progressCount },
+		{ label: "Done", value: doneCount },
+	];
+
+	/* ---------- Monthly Data ---------- */
+
+	const monthMap: Record<string, number> = {};
+
+	for (const task of items) {
+		const d = normalizeDate(task.date);
+
+		const key = `${d.getFullYear()}-${d.getMonth()}`;
+
+		monthMap[key] = (monthMap[key] || 0) + 1;
+	}
+
+	const monthlyData = Object.entries(monthMap).map(([key, value]) => {
+		const [year, month] = key.split("-");
+
+		const date = new Date(Number(year), Number(month));
+
+		return {
+			label: date.toLocaleString("default", { month: "short" }),
+			value,
+		};
+	});
+
+	/* ---------- Upcoming / Active ---------- */
+
+	const now = Date.now();
+	const threeDays = now + 3 * 24 * 60 * 60 * 1000;
+
+	let upcoming = 0;
+
+	for (const task of items) {
+		if (task.done) {
+			continue;
+		}
+
+		const end = normalizeDate(task.endDate).getTime();
+
+		if (end > now && end <= threeDays) {
+			upcoming++;
+		}
+	}
+
+	const active = items.filter((i) => !i.done).length;
+
+	const upcomingActiveData = [
+		{ label: "Upcoming", value: upcoming },
+		{ label: "Active", value: active },
+	];
+
+	/* ---------- Weekly Data ---------- */
+
+	const weekMap: Record<string, number> = {};
+
+	for (const task of items) {
+		const d = normalizeDate(task.date);
+
+		const month = d.toLocaleString("default", { month: "short" });
+
+		const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
+
+		const weekNumber = Math.ceil((d.getDate() + firstDay.getDay()) / 7);
+
+		const key = `${month} Week ${weekNumber}`;
+
+		weekMap[key] = (weekMap[key] || 0) + 1;
+	}
+
+	const weeklyData = Object.entries(weekMap).map(([label, value]) => ({
+		label,
+		value,
+	}));
+
+	/* ---------- UI ---------- */
+
+	return (
+		<div className="w-full space-y-6">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+				<SmallGraph
+					config={smallChartConfig}
+					data={statusData}
+					desc="Work completion status"
+					title="Progress vs Done"
+				/>
+
+				<SmallGraph
+					config={smallChartConfig}
+					data={monthlyData}
+					desc="Month-wise workload"
+					title="Monthly Tasks"
+				/>
+
+				<SmallGraph
+					config={smallChartConfig}
+					data={upcomingActiveData}
+					desc="Deadlines & active work"
+					title="Upcoming & Active"
+				/>
+			</div>
+
+			<div className="flex justify-center">
+				<Card className="w-full md:w-[70%]">
+					<CardHeader>
+						<CardTitle>Weekly Planning</CardTitle>
+						<CardDescription>Week-wise task distribution</CardDescription>
+					</CardHeader>
+
+					<CardContent>
+						<ChartContainer config={bigChartConfig}>
+							<BarChart data={weeklyData}>
+								<CartesianGrid vertical={false} />
+
+								<XAxis
+									axisLine={false}
+									dataKey="label"
+									tickLine={false}
+									tickMargin={10}
+								/>
+
+								<ChartTooltip
+									content={<ChartTooltipContent />}
+									cursor={false}
+								/>
+
+								<Bar dataKey="value" fill="var(--color-value)" radius={8} />
+							</BarChart>
+						</ChartContainer>
+					</CardContent>
+
+					<CardFooter className="flex-col items-start gap-2 text-sm">
+						<div className="flex gap-2 font-medium leading-none">
+							Weekly workload planning
+							<TrendingUp className="h-4 w-4" />
+						</div>
+
+						<div className="text-muted-foreground leading-none">
+							Distribution of tasks per week
+						</div>
+					</CardFooter>
+				</Card>
+			</div>
+		</div>
+	);
+}
+
+/* ---------------- Small Graph ---------------- */
+
+function SmallGraph({
+	title,
+	desc,
+	data,
+	config,
+}: {
+	title: string;
+	desc: string;
+	data: { label: string; value: number }[];
+	config: ChartConfig;
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle className="text-base">{title}</CardTitle>
+
+				<CardDescription className="text-xs">{desc}</CardDescription>
+			</CardHeader>
+
+			<CardContent>
+				<ChartContainer config={config}>
+					<BarChart data={data}>
+						<CartesianGrid vertical={false} />
+
+						<XAxis
+							axisLine={false}
+							dataKey="label"
+							tickLine={false}
+							tickMargin={8}
+						/>
+
+						<ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+
+						<Bar dataKey="value" fill="var(--color-value)" radius={6} />
+					</BarChart>
+				</ChartContainer>
+			</CardContent>
+		</Card>
+	);
+}

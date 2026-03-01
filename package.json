@@ -1,0 +1,48 @@
+{
+  "name": "shadcn-ui-monorepo",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:db": "pnpm --filter @repo/db build",
+    "build:server": "pnpm --filter @repo/server build",
+    "build:api": "tsup --config tsup.api.config.ts",
+    "build": "pnpm run build:db && pnpm run build:server && pnpm run build:api",
+    "dev": "turbo run dev",
+    "start": "turbo run start",
+    "lint": "biome check . --write",
+    "format": "biome format --write .",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md}": [
+      "biome check --write",
+      "ultracite check"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.0",
+    "@playwright/test": "^1.58.2",
+    "@types/minimatch": "^6.0.0",
+    "@types/node": "^25.3.0",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "drizzle-kit": "0.30.6",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1",
+    "turbo": "^2.8.1",
+    "typescript": "5.9.3",
+    "ultracite": "7.2.3"
+  },
+  "packageManager": "pnpm@10.4.1",
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "drizzle-orm": "^0.45.1",
+    "zod": "^4.3.6"
+  }
+}

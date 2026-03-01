@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "buildCommand": "cd ../.. && pnpm --filter @repo/schemas build && pnpm --filter @repo/db build && pnpm --filter @repo/server build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.js"
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+appId: com.anonymous.coolapp
+---
+
+
+
+- tapOn:
+    id: email
+
+- inputText: "hidas@gmail.com"
+- hideKeyboard
+
+- tapOn:
+    id: password
+
+- inputText: "12345678"
+- hideKeyboard
+
+- tapOn:
+    id: login-btn
+
+- assertVisible: "Add Todo"
+
+- tapOn:
+    id: add-todo-btn
+
+- tapOn:
+    id: title
+- inputText: "My Test Todo"
+
+- tapOn:
+    id: desc
+- inputText: "This is a test todo"
+
+
+- tapOn:
+    id: status-picker
+- tapOn: "Todo"
+
+- hideKeyboard
+
+- tapOn:
+    id: start-btn
+
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 5000
+
+
+
+- tapOn:
+    text: "27"
+
+- tapOn:
+    text: "OK"
+
+- tapOn:
+    id: start-time-btn
+- extendedWaitUntil:
+    visible: "OK"
+    timeout: 5000
+
+- tapOn:
+    text: "18"
+- tapOn:
+    text: "0"
+- tapOn:
+    text: "OK"
+
+- tapOn:
+    id: end-date-btn
+- tapOn:
+    text: "28"
+- tapOn:
+    text: "OK"
+
+- tapOn:
+    id: end-time-btn
+- tapOn:
+    text: "12"
+- tapOn:
+    text: "0"
+- tapOn:
+    text: "OK"
+
+- tapOn:
+    id: submit-btn
+
+
+- tapOn: "Confirm"
+
+- assertVisible: "My Test Todo"
+
+- tapOn:
+    text: "My Test Todo"
+
+- tapOn:
+    id: edit-btn-My Test Todo
+
+- assertVisible: "Edit Todo"
+
+
+- tapOn:
+    id: title
+
+
+- eraseText: 100
+
+- inputText: "My edit Test Todo"
+
+- tapOn:
+    id: desc
+
+- eraseText: 100
+
+- inputText: "This todo has been edited"
+
+- hideKeyboard
+
+- tapOn:
+    text: "Update"
+
+- tapOn:
+    text: "Confirm"
+
+- assertVisible: "My edit Test Todo"
+- assertVisible: "This todo has been edited"
+
+
+- tapOn:
+    text: "My edit Test Todo"
+
+- tapOn:
+    id: delete-btn-My edit Test Todo
+
+
+- tapOn: "Confirm"
+
+- assertNotVisible: "My edit Test Todo"
+
+- tapOn:
+    id: logout-btn
+- assertVisible: "Login"
+    

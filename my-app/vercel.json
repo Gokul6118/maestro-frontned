@@ -1,0 +1,10 @@
+{
+  "framework": null,
+  "outputDirectory": ".",
+  "buildCommand": "pnpm run build:server",
+  "functions": {
+    "api/index.ts": {
+      "runtime": "nodejs20.x"
+    }
+  }
+}

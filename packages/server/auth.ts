@@ -29,23 +29,29 @@ export const auth = betterAuth({
 	}),
 
 	trustedOrigins: [
+		"http://localhost:3000",
 		"http://localhost:3001",
+		"http://192.168.1.18:3000",
+		"https://maestro-done-baclend-web.vercel.app",
+		"https://maestro-frontned-web.vercel.app", // ✅ IMPORTANT
 		"coolapp://",
 		"exp://",
-		"http://192.168.1.18:3000",
-		"http://localhost:3000",
 	],
 
 	secret: AUTH_SECRET,
-	baseURL: APP_URL,
+	baseURL: APP_URL, // must be backend url + /api
 
 	emailAndPassword: {
 		enabled: true,
 	},
 
-	cookies: {
-		sameSite: "none", // 🔴 REQUIRED
-		secure: false,
-		path: "/",
+	advanced: {
+		crossOriginCookies: true,
+		defaultCookieAttributes: {
+			sameSite: "none",
+			secure: true,
+			httpOnly: true,
+			partitioned: true, // 🔥 THIS IS MISSING
+		},
 	},
 });

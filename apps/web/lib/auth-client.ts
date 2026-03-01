@@ -1,6 +1,8 @@
 import { createAuthClient } from "better-auth/client";
 
 export const authClient = createAuthClient({
-	baseURL: "https://maestro-done-baclend-web.vercel.app/api/auth",
-	credentials: "include",
+	baseURL: "http://localhost:3000/api/auth",
+	fetchOptions: {
+		credentials: "include",
+	},
 });
